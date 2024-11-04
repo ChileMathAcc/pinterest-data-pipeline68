@@ -13,14 +13,28 @@ random.seed(100)
 
 class AWSDBConnector:
 
-    def __init__(self):
 
-        self.HOST = None
-        self.USER = None
-        self.PASSWORD = None
-        self.DATABASE = None
-        self.PORT = None
+    def __init__(self):
+        creds = AWSDBConnector.read_db_creds(db_creds.yaml)
+        self.HOST = creds[HOST]
+        self.USER = creds[USER]
+        self.PASSWORD = creds[PASSWORD]
+        self.DATABASE = creds[DATABASE]
+        self.PORT = creds[PORT]
+    
+    def read_db_creds(yaml_file):
+        '''
+        Opens a yaml document with the credentails for the database
+        Input: path to yaml file
+        Output: Dictionary with database credentials
+        '''
         
+        #Opens a yaml file (read mode) and loads its data
+        with open(yaml_file, 'r') as d:
+            db_creds = yaml.safe_load(d)
+            
+        return db_creds
+            
     def create_db_connector(self):
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE}?charset=utf8mb4")
         return engine
