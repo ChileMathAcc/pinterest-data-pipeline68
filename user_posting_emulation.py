@@ -6,6 +6,8 @@ import boto3
 import json
 import sqlalchemy
 from sqlalchemy import text
+import yaml
+import pymysql
 
 
 random.seed(100)
@@ -15,12 +17,12 @@ class AWSDBConnector:
 
 
     def __init__(self):
-        creds = AWSDBConnector.read_db_creds(db_creds.yaml)
-        self.HOST = creds[HOST]
-        self.USER = creds[USER]
-        self.PASSWORD = creds[PASSWORD]
-        self.DATABASE = creds[DATABASE]
-        self.PORT = creds[PORT]
+        creds = AWSDBConnector.read_db_creds('db_creds.yaml')
+        self.HOST = creds['HOST']
+        self.USER = creds['USER']
+        self.PASSWORD = creds['PASSWORD']
+        self.DATABASE = creds['DATABASE']
+        self.PORT = creds['PORT']
     
     def read_db_creds(yaml_file):
         '''
