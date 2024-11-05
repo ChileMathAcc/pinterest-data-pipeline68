@@ -14,7 +14,10 @@ random.seed(100)
 
 
 class AWSDBConnector:
-
+    '''
+    Creates a connector to a Pinterest database
+    Attributes: database credentails
+    '''
 
     def __init__(self):
         creds = AWSDBConnector.read_db_creds('db_creds.yaml')
@@ -38,6 +41,9 @@ class AWSDBConnector:
         return db_creds
             
     def create_db_connector(self):
+        '''
+        Creates the connection engine
+        '''
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE}?charset=utf8mb4")
         return engine
 
@@ -46,6 +52,9 @@ new_connector = AWSDBConnector()
 
 
 def run_infinite_post_data_loop():
+    '''
+    Continously pulls information from the Pinterest database
+    '''
     while True:
         sleep(random.randrange(0, 2))
         random_row = random.randint(0, 11000)
