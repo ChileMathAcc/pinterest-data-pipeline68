@@ -30,8 +30,8 @@ class AWSDBConnector:
     def read_db_creds(yaml_file):
         '''
         Opens a yaml document with the credentails for the database
-        Input: path to yaml file
-        Output: Dictionary with database credentials
+        Params: path to yaml file
+        Returns: Dictionary with database credentials
         '''
         
         #Opens a yaml file (read mode) and loads its data
