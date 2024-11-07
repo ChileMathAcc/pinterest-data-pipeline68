@@ -40,7 +40,7 @@ class AWSDBConnector:
             
         return db_creds
     
-    def post_to_API(invoke_url, result, headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}):
+    def post_to_API(invoke_url, result, headers = {'Content-Type': 'application/json'}):
         '''
         Posts data to kafka topics the EC2 server
         Params: invokeurl - API url, result - json payload to be posted, headers - API header
@@ -48,9 +48,10 @@ class AWSDBConnector:
         '''
         payload = json.dumps({
             "records":
-                [{"value":
-                    result}]}, default=str)
+                [{"value": result}]}, default=str)
+        
         response = requests.request("POST", invoke_url, headers=headers, data=payload)
+        
         print(response.status_code)
             
     def create_db_connector(self):
@@ -93,14 +94,14 @@ def run_infinite_post_data_loop():
             for row in user_selected_row:
                 user_result = dict(row._mapping)
             
-            invoke_url = "https://qrtrf2bgl0.execute-api.us-east-1.amazonaws.com/dev"
+            invoke_url = "https://qrtrf2bgl0.execute-api.us-east-1.amazonaws.com/dev/topics/0affe94cc7d3.pin"
             
             print(pin_result)
             AWSDBConnector.post_to_API(invoke_url=invoke_url, result= pin_result)
-            print(geo_result)
-            AWSDBConnector.post_to_API(invoke_url=invoke_url, result= geo_result)
-            print(user_result)
-            AWSDBConnector.post_to_API(invoke_url=invoke_url, result= user_result)
+            # print(geo_result)
+            # AWSDBConnector.post_to_API(invoke_url=invoke_url, result= geo_result)
+            # print(user_result)
+            # AWSDBConnector.post_to_API(invoke_url=invoke_url, result= user_result)
 
 
 if __name__ == "__main__":
