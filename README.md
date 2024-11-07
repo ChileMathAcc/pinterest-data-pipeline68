@@ -12,6 +12,8 @@
 
 This project aims to process data streams from a Pinterest API emulator.
 
+Pinterest data is produced locally then sent to kafka topics running on an EC2 instance were they are stored in an S3 bucket.
+
 ## Installation
 
 ### Required Credentails
