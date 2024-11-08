@@ -38,8 +38,29 @@ PORT:
 ## Usage
 
 ```mermaid
-graph LR;
-a[Generate Pinterest Data] --> b[Post Data to Kafka Topics] --> id1[(Kafka Stream Saved on S3)]
+flowchart TB
+  
+  subgraph a[Pinterest Data Pipeline]
+      direction LR
+        
+        subgraph i[Databricks]
+          direction LR
+            j[Mount S3 Bucket] --> k[Save Each Topic a Dataframe];
+        end
+
+        subgraph f[EC2 instance]
+          direction LR
+            g[Save Data to 1 of 3 Topics <br> EC2 Kafka Client] --> h[Send Data to S3 Bucket <br> MSK Connect];
+        end
+
+        subgraph b[user_posting_emulation.py]
+          direction LR
+            c[Get Data Entries  <br>  RDS Connector] --> d[Save Entries as <br> Dictionaries];
+            d --> e[Send Entries to EC2 <br> REST API]
+        end
+
+        
+    end
 ```
 
 ## File Structure
