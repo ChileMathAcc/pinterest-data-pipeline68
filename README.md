@@ -37,12 +37,41 @@ PORT:
 
 ## Usage
 
+```mermaid
+flowchart TB
+  
+  subgraph a[Pinterest Data Pipeline]
+      direction LR
+        
+        subgraph i[Databricks]
+          direction LR
+            j[Mount S3 Bucket] --> k[Save Each Topic a Dataframe];
+        end
+
+        subgraph f[EC2 instance]
+          direction LR
+            g[Save Data to 1 of 3 Topics <br> EC2 Kafka Client] --> h[Send Data to S3 Bucket <br> MSK Connect];
+        end
+
+        subgraph b[user_posting_emulation.py]
+          direction LR
+            c[Get Data Entries  <br>  RDS Connector] --> d[Save Entries as <br> Dictionaries];
+            d --> e[Send Entries to EC2 <br> REST API]
+        end
+
+        
+    end
+```
+
 ## File Structure
 
-```mermaid
-graph LR;
-1[Pinterest API Generates User Data] --> 2[Kafka on EC2]
-```
+### user_posting_emulation.py
+
+This python file has one Class AWSDBConnector whose attributes are the credentails (HOST, USER, PASSWORD, DATABASE, PORT) used to connect to an RDS of Pinterest data. This Class has three methods:
+
+- read_db_creds - This takes in a yaml file with the nessecary credentails and returns a dictionary of these credentials
+- post_to_API - This take some Pinterest data and sends it to an API
+- create_db_connector - Creates the RDS connection 
 
 ## License
 

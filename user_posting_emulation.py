@@ -113,7 +113,7 @@ def run_infinite_post_data_loop():
             for row in user_selected_row:
                 user_result = dict(row._mapping)
             
-            print(f'Pinterest data: {pin_result}')
+            print(f'Pinterest post data: {pin_result}')
             #Uses the post to api method to send the Pinterest data
             AWSDBConnector.post_to_API(result= ['pin', pin_result])
             
