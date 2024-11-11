@@ -22,7 +22,7 @@ class KinesisConnector:
         stream_name = f"streaming-0affe94cc7d3-{result[0]}"
         
         #Modifies the api url with the appropriate topic
-        invoke_url = f"https://qrtrf2bgl0.execute-api.us-east-1.amazonaws.com/feat/streams/stream-name={stream_name}/record"
+        invoke_url = f"https://qrtrf2bgl0.execute-api.us-east-1.amazonaws.com/feat/streams/{stream_name}/record"
         
         #Creates the payload to be post from a dictionary
         payload = json.dumps({
