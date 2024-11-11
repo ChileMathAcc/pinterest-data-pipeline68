@@ -10,9 +10,6 @@ import yaml
 import pymysql
 
 
-random.seed(100)
-
-
 class AWSDBConnector:
     '''
     Creates a connector to a Pinterest database
@@ -20,6 +17,9 @@ class AWSDBConnector:
     '''
 
     def __init__(self):
+        '''
+        Intializes an instanst with the desired attributes
+        '''
         creds = AWSDBConnector.read_db_creds('db_creds.yaml')
         self.HOST = creds['HOST']
         self.USER = creds['USER']
@@ -40,7 +40,7 @@ class AWSDBConnector:
             
         return db_creds
     
-    def post_to_API(result: list, headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}):
+    def post_to_kafka(result: list, headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}):
         '''
         Posts data to kafka topics on an EC2 server
         Params: result - a list of the form [topic, json payload],
@@ -76,7 +76,7 @@ class AWSDBConnector:
 new_connector = AWSDBConnector()
 
 
-def run_infinite_post_data_loop():
+def infinite_post_data_kafka():
     '''
     Continously pulls information from the Pinterest database emulation
     '''
@@ -115,17 +115,17 @@ def run_infinite_post_data_loop():
             
             print(f'Pinterest post data: {pin_result}')
             #Uses the post to api method to send the Pinterest data
-            AWSDBConnector.post_to_API(result= ['pin', pin_result])
+            AWSDBConnector.post_to_kafka(result= ['pin', pin_result])
             
             print(f'Geographical data: {geo_result}')
             #Uses the post to api method to send the Pinterest data
-            AWSDBConnector.post_to_API(result= ['geo', geo_result])
+            AWSDBConnector.post_to_kafka(result= ['geo', geo_result])
             
             print(f'User data: {user_result}')
             #Uses the post to api method to send the Pinterest data
-            AWSDBConnector.post_to_API(result= ['user', user_result])
+            AWSDBConnector.post_to_kafka(result= ['user', user_result])
 
 
 if __name__ == "__main__":
-    run_infinite_post_data_loop()
+    infinite_post_data_kafka()
     print('Working')
