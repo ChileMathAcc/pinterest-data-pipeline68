@@ -66,24 +66,26 @@ Create a notebook and mount it onto the S3 bucket
 
 Below is a diagramatic representation of the Pinterest Pipeline subdivided into sections and tasks with arrows representing the data flow.
 
+### Main flow chart
+
 ```mermaid
 flowchart TB
   
   subgraph a[Pinterest Data Pipeline]
     direction TB
-      
-      subgraph p[Apache Airflow]
+
+      subgraph i[Apache Airflow]
         direction TB
+
+        subgraph j[Databricks Notebook]
+          direction LR
+            k@{shape: docs, label : "Queries on the Data in the Dataframes"} --> l[Save Databricks Notebook in Repository]
+        end
 
         subgraph m[Databricks Notebook]
           direction LR
-            n@{shape: docs, label : "Queries on the Data in the Dataframes"} --> o[Save Databricks Notebook in Repository]
-        end
-
-        subgraph i[Databricks Notebook]
-          direction LR
-            j@{shape: bow-rect, label: "Mount S3 Bucket"} --> k[Save Each Topic in a Dataframe];
-            k --> l(Clean and Reformat Each Dataframe);
+            n@{shape: bow-rect, label: "Mount S3 Bucket"} --> o[Save Each Topic in a Dataframe];
+            o --> p(Clean and Re-format Each Dataframe);
         end
   end
 
@@ -99,9 +101,39 @@ flowchart TB
   end
 
   b -- REST API --> f
-  f --> i
-  i --> m
+  f --> m
+  m --> j
+end
+```
 
+### Kinesis flow chart
+
+```mermaid
+flowchart TB
+  
+  subgraph a[Kinesis Data Pipeline]
+    direction TB
+
+        subgraph i[Databricks Notebook]
+          direction LR
+            k[Save Each Stream in a Dataframe];
+            k --> l(Clean and Re-format Each Dataframe);
+            l --> z[Save the Notebook in the Repo]
+        end
+
+  subgraph f[Kinesis]
+    direction LR
+      g[Save Data to 1 of 3 Streams] -- Stream --> h[(Databricks Notebook)];
+  end
+
+  subgraph b[user_posting_emulation_streaming.py]
+    direction LR
+      c[Get Data Entries] -- RDS Connector --> d[Save Entries as <br> Dictionaries];
+        d --> e[Send Entries to AWS Kinesis]
+  end
+
+  b -- REST API --> f
+  f --> i
 end
 ```
 
@@ -139,6 +171,10 @@ At this stage we can aggregate, clean and query the data we have recieved.
 
 ![Median follower](Media/medianfollower.png)
 
+#### 3.5 Kinesis
+
+This stage offer a streaming based variant to the main Pinterest Pipeline. Entries of data are created and streamed to Kinesis using a API and the same restructuring and cleaning methods as those found in the main batch based pipeline are applied.
+
 ## 4 File Structure
 
 ### 4.1 [Main file](user_posting_emulation.py)
@@ -149,7 +185,17 @@ This python file has one Class AWSDBConnector whose attributes are the credentai
 - post_to_API - This takes Pinterest data and sends it to an EC2 instance using an API.
 - create_db_connector - Creates the RDS connection.
 
-### 4.2 [DAG file](0affe94cc7d3_day.py)
+### 4.2 [Kinesis file](user_posting_emulation_streaming.py)
+
+This python file has one Class KinesisConnector with no attributes. Instead this Class has five methods:
+
+- list-streams - Return information about all the data streams avialable.
+- create_stream - Creates a stream of with the input name.
+- describe_stream - Describes a stream with the input name
+- delete_stream - Deletes a stream with the input name.
+- record_to_Kinesis - This takes Pinterest data and streams it to Kinesis using an API.
+
+### 4.3 [DAG file](0affe94cc7d3_day.py)
 
 This python file define the DAG 0affe94cc7d3_dag which submits a request to run a databricks notebook.
 
