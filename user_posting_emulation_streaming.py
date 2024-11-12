@@ -16,7 +16,7 @@ class KinesisConnector:
         Posts data to Kinesis Data Streams
         Params: result - a list of the form [topic, json payload],
                 headers - API header
-        Prints: Status code
+        Returns: Status code
         '''
         
         stream_name = f"streaming-0affe94cc7d3-{result[0]}"
@@ -34,7 +34,7 @@ class KinesisConnector:
         #Sends the post request to the api
         response = requests.request("PUT", invoke_url, headers=headers, data=payload)
         
-        print(f'Status code: {response.status_code}')
+        return response.status_code
     
     def list_streams():
         '''
@@ -63,9 +63,9 @@ class KinesisConnector:
         
         print(json.dumps(json.loads(response.content.decode('utf8')), indent=2))
         
-    def delete_stream(stream_name:str):
+    def delete_stream(stream_name:str): # Not tested
         '''
-        Deletes a kinesis stream with the give input
+        In principal: Deletes a kinesis stream with the give input
         Params: str
         '''
         
@@ -88,7 +88,7 @@ def infinite_post_data_kinesis():
 
         with engine.connect() as connection:
             
-            #Create and executes a sql query to retrieve a random row of data
+            #Executes a sql query to retrieve a random row of data
             pin_string = text(f"SELECT * FROM pinterest_data LIMIT {random_row}, 1")
             pin_selected_row = connection.execute(pin_string)
             
@@ -96,7 +96,7 @@ def infinite_post_data_kinesis():
             for row in pin_selected_row:
                 pin_result = dict(row._mapping)
 
-            #Create and executes a sql query to retrieve a random row of data
+            #Executes a sql query to retrieve a random row of data
             geo_string = text(f"SELECT * FROM geolocation_data LIMIT {random_row}, 1")
             geo_selected_row = connection.execute(geo_string)
             
@@ -104,7 +104,7 @@ def infinite_post_data_kinesis():
             for row in geo_selected_row:
                 geo_result = dict(row._mapping)
 
-            #Create and executes a sql query to retrieve a random row of data
+            #Executes a sql query to retrieve a random row of data
             user_string = text(f"SELECT * FROM user_data LIMIT {random_row}, 1")
             user_selected_row = connection.execute(user_string)
             
@@ -114,7 +114,12 @@ def infinite_post_data_kinesis():
             
             print(f'Pinterest post data: {pin_result}')
             #Uses the put method for the kinesis api to send the Pinterest post data
-            KinesisConnector.record_to_Kinesis(result= ['pin', pin_result])
+            status_code = KinesisConnector.record_to_Kinesis(result= ['pin', pin_result])
+            
+            # Check if records are being sent through
+            if status_code != 200:
+                print(f"Terminating infinite loop. API error - status code: {status_code}")
+                break
             
             print(f'Geographical data: {geo_result}')
             #Uses the put method for the kinesis api to send the Pinterest post data

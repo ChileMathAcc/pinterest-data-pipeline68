@@ -2,3 +2,4 @@ db_creds.yaml
 Key pair name.pem
 ProjectCreds.txt
 venv/
+__pycache__
