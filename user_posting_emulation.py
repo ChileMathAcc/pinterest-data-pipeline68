@@ -45,7 +45,7 @@ class AWSDBConnector:
         Posts data to kafka topics on an EC2 server
         Params: result - a list of the form [topic, json payload],
                 headers - API header
-        Prints: Status code
+        Return: Status code
         '''
         
         topic = result[0]
@@ -61,7 +61,7 @@ class AWSDBConnector:
         #Sends the post request to the api
         response = requests.request("POST", invoke_url, headers=headers, data=payload)
         
-        print(f'Status code: {response.status_code}')
+        return response.status_code
             
     def create_db_connector(self):
         '''
@@ -69,7 +69,8 @@ class AWSDBConnector:
         '''
         
         #Uses the atributes of this Class to construct an engine
-        engine = sqlalchemy.create_engine(f"mysql+pymysql://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE}?charset=utf8mb4")
+        engine = sqlalchemy.create_engine(f"mysql+pymysql://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.DATABASE}?charset=utf8mb4",
+                                          pool_pre_ping = True)
         return engine
 
 
@@ -115,7 +116,12 @@ def infinite_post_data_kafka():
             
             print(f'Pinterest post data: {pin_result}')
             #Uses the post to api method to send the Pinterest data
-            AWSDBConnector.post_to_kafka(result= ['pin', pin_result])
+            status_code = AWSDBConnector.post_to_kafka(result= ['pin', pin_result])
+            
+            # Check if records are being sent through
+            if status_code != 200:
+                print(f"Terminating infinite loop. API error - status code: {status_code}")
+                break
             
             print(f'Geographical data: {geo_result}')
             #Uses the post to api method to send the Pinterest data
